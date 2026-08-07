@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Escaleta en Directo · Artes Búho</title>
+<meta name="description" content="Horario en vivo, cuenta atrás y avisos para todo el equipo — Artes Búho.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTYiIGZpbGw9IiMyYTQ2YTgiLz48dGV4dCB4PSIzMiIgeT0iNDEiIGZvbnQtZmFtaWx5PSJBcmlhbCwgSGVsdmV0aWNhLCBzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iNzAwIiBmb250LXNpemU9IjI0IiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5BQjwvdGV4dD48L3N2Zz4=">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Escaleta en Directo · Artes Búho">
+<meta property="og:description" content="Horario en vivo, cuenta atrás y avisos para todo el equipo.">
+<meta property="og:image" content="og-image.png">
+<meta name="theme-color" content="#2a46a8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Lora:ital@1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Artes Búho brand tokens, sampled from Cuadrante de Oficina ---------- */
+  :root, [data-theme="day"]{
+    --bg:#fbf8f1;
+    --bg-elev:#ffffff;
+    --bg-elev2:#f2ecdd;
+    --border:#e7dfcb;
+    --text:#0e2146;
+    --text-dim:#63708a;
+    --text-faint:#a6accb;
+    --blue:#4c73d6;
+    --blue-deep:#2a46a8;
+    --gold:#c6941f;
+    --gold-fill:#d19f31;
+    --green:#19a34b;
+    --red:#dc2625;
+    --teal:#2ca0bb;
+    --header-grad:linear-gradient(135deg,#5c80dc 0%,#2a46a8 100%);
+    --on-fill-text:#ffffff;
+    --shadow:0 10px 28px rgba(20,30,70,.08);
+  }
+  [data-theme="night"]{
+    --bg:#0e2146;
+    --bg-elev:#142a57;
+    --bg-elev2:#1c3568;
+    --border:#28407a;
+    --text:#f3eee2;
+    --text-dim:#a2b0cf;
+    --text-faint:#5c6e93;
+    --blue:#7f9dee;
+    --blue-deep:#4c73d6;
+    --gold:#f0b94a;
+    --gold-fill:#c6941f;
+    --green:#34c97a;
+    --red:#ff5b5a;
+    --teal:#4dc3de;
+    --header-grad:linear-gradient(135deg,#1c3568 0%,#081328 100%);
+    --on-fill-text:#0e2146;
+    --shadow:0 10px 28px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    min-height:100vh;padding-bottom:44px;
+    transition:background .5s ease,color .5s ease;
+  }
+  .mono{font-family:'Space Mono',ui-monospace,'SF Mono',Menlo,monospace;}
+  .accent{font-family:'Lora',Georgia,serif;font-style:italic;color:var(--gold);}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px;}
+
+  /* ---------- brand banner ---------- */
+  .banner{
+    background:var(--header-grad);position:relative;overflow:hidden;
+    padding:16px 0 18px;transition:background .5s ease;
+  }
+  .banner::after{
+    content:"";position:absolute;right:-70px;top:-60px;width:220px;height:220px;
+    border-radius:50%;background:rgba(255,255,255,.07);
+  }
+  .banner-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+  .ab-badge{
+    width:42px;height:42px;border-radius:11px;background:#fff;color:var(--blue-deep);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;
+    flex:none;letter-spacing:.01em;
+  }
+  .banner-title{color:#fff;font-weight:700;font-size:18px;line-height:1.15;}
+  .banner-sub{color:rgba(255,255,255,.78);font-size:10.5px;letter-spacing:.14em;font-weight:600;margin-top:2px;}
+  .banner-right{margin-left:auto;text-align:right;flex:none;}
+  .liveclock{color:#fff;font-size:14px;}
+  .syncline{display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-top:2px;}
+  .syncdot{width:6px;height:6px;border-radius:50%;background:#7CF2B4;}
+  .syncdot.stale{background:rgba(255,255,255,.4);}
+  .synclabel{color:rgba(255,255,255,.75);font-size:10px;}
+
+  .pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;position:relative;z-index:1;}
+  .pill{
+    display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:20px;
+    background:rgba(255,255,255,.14);color:#fff;font-size:12.5px;font-weight:600;
+    border:1px solid rgba(255,255,255,.18);cursor:pointer;transition:.15s;
+  }
+  .pill:active{transform:scale(.96);}
+  .pill.solid{background:#fff;color:var(--blue-deep);}
+  .pill svg{flex:none;}
+
+  /* ---------- body head (event info) ---------- */
+  .body-head{padding-top:20px;}
+  .eyebrow{font-size:10.5px;letter-spacing:.14em;color:var(--gold);font-weight:700;margin-bottom:6px;}
+  h1.evtitle{font-size:23px;font-weight:800;margin:0;line-height:1.2;letter-spacing:-.01em;}
+  .evmeta{font-size:13px;color:var(--text-dim);margin-top:4px;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    margin-top:18px;border-radius:18px;border:1px solid var(--border);
+    background:var(--bg-elev);box-shadow:var(--shadow);
+    padding:20px 18px 18px;text-align:center;transition:.4s;
+  }
+  .cattag{
+    display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;
+    font-size:10.5px;font-weight:800;letter-spacing:.09em;color:var(--on-fill-text);
+  }
+  .hero-label{font-size:17px;font-weight:700;margin:12px 0 16px;padding:0 6px;line-height:1.3;}
+  .ring-wrap{position:relative;width:186px;height:186px;margin:0 auto 14px;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-track{fill:none;stroke:var(--bg-elev2);stroke-width:9;}
+  .ring-fill{fill:none;stroke:var(--blue);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .4s linear,stroke .3s;}
+  .ring-fill.urgent{animation:ringpulse 1s ease-in-out infinite;}
+  @keyframes ringpulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring-time{font-family:'Space Mono',monospace;font-size:30px;font-weight:700;letter-spacing:-.01em;}
+  .ring-sub{font-size:11px;color:var(--text-dim);margin-top:3px;letter-spacing:.04em;}
+  .hero-next{font-size:13px;color:var(--text-dim);}
+  .hero-next b{color:var(--text);font-weight:700;}
+
+  /* ---------- legend ---------- */
+  .legend{display:flex;gap:8px;overflow-x:auto;padding:16px 2px 4px;scrollbar-width:none;}
+  .legend::-webkit-scrollbar{display:none;}
+  .legend-item{
+    flex:none;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
+    padding:5px 11px;border-radius:20px;color:var(--on-fill-text);
+  }
+
+  /* ---------- timeline ---------- */
+  .timeline{margin-top:6px;display:flex;flex-direction:column;gap:7px;}
+  .row{
+    display:flex;align-items:stretch;gap:12px;background:var(--bg-elev);
+    border:1px solid var(--border);border-radius:13px;padding:11px 13px;
+    transition:.2s;box-shadow:var(--shadow);
+  }
+  .row .rail{width:5px;border-radius:3px;flex:none;}
+  .row .body{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .row .time{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--text-dim);}
+  .row .label{font-size:14.5px;margin-top:2px;color:var(--text);font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px;}
+  .row .tag{font-size:9.5px;font-weight:800;letter-spacing:.06em;padding:2px 8px;border-radius:10px;color:var(--on-fill-text);flex:none;}
+  .row .status{flex:none;font-size:15px;width:20px;text-align:center;color:var(--text-faint);}
+  .row.done{opacity:.45;}
+  .row.done .label{text-decoration:line-through;text-decoration-color:var(--text-faint);}
+  .row.current{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb, var(--blue) 25%, transparent);}
+  .row.current .status{color:var(--blue);}
+
+  /* ---------- edit mode ---------- */
+  .section-title{font-size:10.5px;letter-spacing:.1em;color:var(--text-faint);margin:20px 2px 8px;font-weight:700;}
+  .editfields{display:flex;flex-direction:column;gap:10px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:11px;color:var(--text-dim);font-weight:600;}
+  input[type=text],input[type=date],input[type=time],select{
+    background:var(--bg-elev);border:1px solid var(--border);color:var(--text);
+    border-radius:10px;padding:9px 11px;font-size:14px;font-family:inherit;width:100%;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--blue);}
+  .editrow{background:var(--bg-elev);border:1px solid var(--border);border-radius:13px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow);}
+  .editrow-top{display:flex;gap:8px;margin-bottom:8px;}
+  .editrow-top input[type=time]{flex:1;}
+  .editrow-mid{display:flex;gap:8px;}
+  .editrow-mid select{flex:none;width:150px;}
+  .delbtn{flex:none;width:38px;border-radius:10px;border:1px solid var(--border);background:var(--bg-elev2);color:var(--red);font-size:16px;cursor:pointer;}
+  .addbtn{width:100%;padding:12px;border-radius:12px;border:1px dashed var(--border);background:transparent;color:var(--text-dim);font-size:14px;cursor:pointer;margin-top:4px;font-weight:600;}
+  .savebar{display:flex;gap:10px;margin-top:16px;}
+  .btn{flex:1;padding:13px;border-radius:12px;border:none;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-ghost{background:var(--bg-elev2);color:var(--text-dim);border:1px solid var(--border);}
+  .resetlink{display:block;text-align:center;margin-top:16px;font-size:12.5px;color:var(--text-faint);background:none;border:none;cursor:pointer;text-decoration:underline;width:100%;}
+  .confirmbar{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;font-size:12.5px;color:var(--text-dim);flex-wrap:wrap;}
+  .confirmbar button{background:var(--bg-elev2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:12.5px;cursor:pointer;}
+  .confirmbar button.danger{color:var(--red);border-color:var(--red);}
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
+    background:var(--text);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;
+    opacity:0;pointer-events:none;transition:.3s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.3);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  ::selection{background:var(--blue);color:#fff;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "running-order-v1";
+  var editMode = false;
+  var soundOn = false;
+  var themeMode = "auto"; // auto | day | night
+  var schedule = null;
+  var lastSyncAt = null;
+  var pingedWarn = {};
+  var editDraft = null;
+
+  var CATS = {
+    logistica:{label:"Logística",      color:"var(--gold-fill)", lock:false},
+    tecnica:  {label:"Gestión técnica", color:"var(--teal)",      lock:false},
+    show:     {label:"Bolo",            color:"var(--red)",       lock:true},
+    descanso: {label:"Descanso",        color:"var(--green)",     lock:true}
+  };
+  var CAT_ORDER = ["logistica","tecnica","show","descanso"];
+  // upgrades schedules saved under the previous 6-category scheme
+  var CAT_MIGRATE = {logistica:"logistica",montaje:"tecnica",sonido:"tecnica",
+                      descanso:"descanso",show:"show",margen:"descanso"};
+
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+  function normalizeCat(c){ return CATS[c] ? c : (CAT_MIGRATE[c] || "logistica"); }
+
+  function defaultSchedule(){
+    return {
+      eventName:"Noches de Neón",
+      venue:"Paredes de Escalona (Toledo)",
+      eventDate:"2026-08-08",
+      updatedAt:new Date().toISOString(),
+      blocks:[
+        {id:uid(),start:"13:30",end:"14:00",label:"Recogida de camión",cat:"logistica"},
+        {id:uid(),start:"14:00",end:"14:30",label:"Margen",cat:"descanso"},
+        {id:uid(),start:"14:30",end:"15:45",label:"Carga de equipo en Artes Búho",cat:"logistica"},
+        {id:uid(),start:"15:45",end:"16:45",label:"Margen",cat:"descanso"},
+        {id:uid(),start:"16:45",end:"17:45",label:"Viaje, llegada y descarga",cat:"logistica"},
+        {id:uid(),start:"17:45",end:"20:15",label:"Montaje general",cat:"tecnica"},
+        {id:uid(),start:"20:15",end:"20:30",label:"Montaje de instrumentos",cat:"tecnica"},
+        {id:uid(),start:"20:30",end:"22:30",label:"Prueba de sonido",cat:"tecnica"},
+        {id:uid(),start:"22:30",end:"23:15",label:"Descanso y cena del equipo",cat:"descanso"},
+        {id:uid(),start:"23:15",end:"23:30",label:"Prevenidos, equipo técnico",cat:"show"},
+        {id:uid(),start:"23:30",end:"01:30",label:"Actuación — Parte 1",cat:"show"},
+        {id:uid(),start:"01:30",end:"02:00",label:"Intermedio",cat:"descanso"},
+        {id:uid(),start:"02:00",end:"04:00",label:"Actuación — Parte 2",cat:"show"},
+        {id:uid(),start:"04:00",end:"06:15",label:"Desmontaje y carga de camión",cat:"logistica"},
+        {id:uid(),start:"06:15",end:"07:15",label:"Viaje de regreso",cat:"logistica"},
+        {id:uid(),start:"07:15",end:"08:15",label:"Descarga y fin en Artes Búho",cat:"logistica"},
+        {id:uid(),start:"08:15",end:"08:45",label:"Devolución de furgoneta",cat:"logistica"}
+      ]
+    };
+  }
+
+  function toMin(hhmm){
+    var p = (hhmm||"00:00").split(":");
+    return (parseInt(p[0],10)||0)*60 + (parseInt(p[1],10)||0);
+  }
+  function pad(n){ return n<10 ? "0"+n : ""+n; }
+
+  function computeAbs(sch){
+    var base = new Date(sch.eventDate+"T00:00:00");
+    var cursor = 0;
+    var out = [];
+    for (var i=0;i<sch.blocks.length;i++){
+      var b = sch.blocks[i];
+      var sMin = toMin(b.start);
+      var k = Math.floor(cursor/1440);
+      var candStart = sMin + k*1440;
+      if (candStart < cursor) candStart += 1440;
+      var eMin = toMin(b.end);
+      var k2 = Math.floor(candStart/1440);
+      var candEnd = eMin + k2*1440;
+      if (candEnd <= candStart) candEnd += 1440;
+      out.push({ id:b.id, label:b.label, cat:normalizeCat(b.cat), start:b.start, end:b.end,
+                 absStart:candStart, absEnd:candEnd });
+      cursor = candEnd;
+    }
+    return { base:base, blocks:out };
+  }
+  function nowAbsMinutes(base){ return (Date.now()-base.getTime())/60000; }
+
+  function fmtRemain(minutes){
+    if (minutes<0) minutes = 0;
+    var totalSec = Math.round(minutes*60);
+    var h = Math.floor(totalSec/3600), m = Math.floor((totalSec%3600)/60), s = totalSec%60;
+    return h>0 ? (h+":"+pad(m)+":"+pad(s)) : (pad(m)+":"+pad(s));
+  }
+  function fmtClock(d){ return pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds()); }
+
+  // ---------- theme ----------
+  function isNightNow(){ var h = new Date().getHours(); return (h>=21 || h<7); }
+  function applyTheme(){
+    var eff = themeMode==="auto" ? (isNightNow()?"night":"day") : themeMode;
+    document.documentElement.setAttribute("data-theme", eff);
+  }
+  function themeIcon(){
+    if (themeMode==="day") return "☀️";
+    if (themeMode==="night") return "🌙";
+    return isNightNow() ? "🌙" : "☀️";
+  }
+  function themeLabel(){
+    if (themeMode==="day") return "Día";
+    if (themeMode==="night") return "Noche";
+    return "Auto";
+  }
+
+  // ---------- storage ----------
+  // .get() throws both for a genuinely missing key (expected on first run)
+  // and for real errors — it does not distinguish. So a thrown get() is
+  // never treated as fatal: fall back to defaults and try to persist.
+  function loadSchedule(){
+    return window.storage.get(STORAGE_KEY, true).then(function(res){
+      if (res && res.value){
+        schedule = JSON.parse(res.value);
+        lastSyncAt = Date.now();
+      } else {
+        schedule = defaultSchedule();
+        persistSchedule(schedule);
+      }
+    }).catch(function(){
+      schedule = defaultSchedule();
+      persistSchedule(schedule);
+    });
+  }
+
+  function persistSchedule(sch, attempt){
+    attempt = attempt || 0;
+    window.storage.set(STORAGE_KEY, JSON.stringify(sch), true).then(function(res){
+      if (!res) throw new Error("empty result");
+      lastSyncAt = Date.now();
+      updateSyncUI();
+    }).catch(function(){
+      updateSyncUI();
+      if (attempt < 6) setTimeout(function(){ persistSchedule(sch, attempt+1); }, 5000);
+    });
+  }
+
+  function pollRemote(){
+    if (editMode) return;
+    window.storage.get(STORAGE_KEY, true).then(function(res){
+      if (res && res.value){
+        var remote = JSON.parse(res.value);
+        if (remote.updatedAt !== schedule.updatedAt){
+          schedule = remote; pingedWarn = {};
+          renderAll();
+          showToast("Horario actualizado por el equipo");
+        }
+        lastSyncAt = Date.now();
+        updateSyncUI();
+      }
+    }).catch(function(){});
+  }
+
+  // ---------- audio / haptics ----------
+  function beep(freq,dur){
+    if (!soundOn) return;
+    try{
+      var ctx = window._roCtx || (window._roCtx = new (window.AudioContext||window.webkitAudioContext)());
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type="sine"; o.frequency.value=freq; g.gain.value=0.0001;
+      o.connect(g); g.connect(ctx.destination);
+      var t = ctx.currentTime;
+      g.gain.exponentialRampToValueAtTime(0.18,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur/1000);
+      o.start(t); o.stop(t+dur/1000+0.03);
+    }catch(e){}
+  }
+  function buzz(pattern){ if (!soundOn) return; try{ if (navigator.vibrate) navigator.vibrate(pattern); }catch(e){} }
+
+  // ---------- state ----------
+  var lastCurrentId = null;
+
+  function getState(){
+    var abs = computeAbs(schedule);
+    var now = nowAbsMinutes(abs.base);
+    var blocks = abs.blocks;
+    if (!blocks.length) return {phase:"empty"};
+    if (now < blocks[0].absStart) return {phase:"pre", next:blocks[0], base:abs.base, blocks:blocks, now:now};
+    if (now >= blocks[blocks.length-1].absEnd) return {phase:"post", last:blocks[blocks.length-1], base:abs.base, blocks:blocks, now:now};
+    for (var i=0;i<blocks.length;i++){
+      if (now>=blocks[i].absStart && now<blocks[i].absEnd){
+        return {phase:"active", current:blocks[i], next:blocks[i+1]||null, base:abs.base, blocks:blocks, now:now};
+      }
+    }
+    var nxt=null;
+    for (var j=0;j<blocks.length;j++){ if (blocks[j].absStart>now){ nxt=blocks[j]; break; } }
+    return {phase:"gap", next:nxt, base:abs.base, blocks:blocks, now:now};
+  }
+
+  // ---------- render ----------
+  var app = document.getElementById("app");
+
+  function renderAll(){ applyTheme(); if (editMode) renderEdit(); else renderView(); }
+
+  function esc(s){
+    return (s||"").replace(/[&<>"']/g, function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; });
+  }
+  function fmtDateLong(iso){
+    try{
+      var d = new Date(iso+"T00:00:00");
+      var s = d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+      return s.charAt(0).toUpperCase()+s.slice(1);
+    }catch(e){ return iso; }
+  }
+  function icon(name){
+    var icons = {
+      sound:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
+      edit:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>',
+      sync:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.3 6.4M3 12a9 9 0 0 1 15.3-6.4"></path><path d="M21 3v6h-6M3 21v-6h6"></path></svg>',
+      lock:'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>'
+    };
+    return icons[name]||"";
+  }
+
+  function bannerHTML(){
+    var syncOk = lastSyncAt && (Date.now()-lastSyncAt<20000);
+    return ''+
+    '<div class="banner"><div class="wrap">'+
+      '<div class="banner-top">'+
+        '<div class="ab-badge">AB</div>'+
+        '<div><div class="banner-title">Escaleta en Directo</div>'+
+        '<div class="banner-sub">ARTES BÚHO · PRODUCCIÓN EN VIVO</div></div>'+
+        '<div class="banner-right">'+
+          '<div class="mono liveclock" id="liveclock">--:--:--</div>'+
+          '<div class="syncline"><span class="syncdot'+(syncOk?'':' stale')+'" id="syncdot"></span>'+
+          '<span class="synclabel" id="synclabel">'+(syncOk?'Sincronizado':'Guardado local')+'</span></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="pillrow">'+
+        '<button class="pill" id="btn-sync">'+icon("sync")+' Sincronizar</button>'+
+        '<button class="pill'+(soundOn?' solid':'')+'" id="btn-sound">'+icon("sound")+' Avisos '+(soundOn?"on":"off")+'</button>'+
+        '<button class="pill" id="btn-theme">'+themeIcon()+' '+themeLabel()+'</button>'+
+        '<button class="pill'+(editMode?' solid':'')+'" id="btn-edit">'+icon("edit")+' Editar</button>'+
+      '</div>'+
+    '</div></div>';
+  }
+
+  function bodyHeadHTML(){
+    return '<div class="wrap"><div class="body-head">'+
+      '<div class="eyebrow">EVENTO ACTUAL</div>'+
+      '<h1 class="evtitle" id="ro-name">'+esc(schedule.eventName)+'</h1>'+
+      '<div class="evmeta">'+esc(schedule.venue)+' · '+fmtDateLong(schedule.eventDate)+' · <span class="accent">en directo</span></div>'+
+    '</div></div>';
+  }
+
+  function renderView(){
+    var st = getState();
+    var html = bannerHTML() + bodyHeadHTML();
+
+    html += '<div class="wrap">';
+    html += '<div class="hero" id="hero">';
+    html += '<span class="cattag" id="cattag"></span>';
+    html += '<div class="hero-label" id="hero-label"></div>';
+    html += '<div class="ring-wrap"><svg width="186" height="186" viewBox="0 0 186 186">'+
+      '<circle class="ring-track" cx="93" cy="93" r="76"></circle>'+
+      '<circle class="ring-fill" id="ring-fill" cx="93" cy="93" r="76" stroke-dasharray="477.5" stroke-dashoffset="477.5"></circle>'+
+      '</svg><div class="ring-center"><div class="ring-time mono" id="ring-time">--:--</div>'+
+      '<div class="ring-sub" id="ring-sub"></div></div></div>';
+    html += '<div class="hero-next" id="hero-next"></div>';
+    html += '</div>';
+
+    html += '<div class="legend">';
+    CAT_ORDER.forEach(function(k){
+      html += '<div class="legend-item" style="background:'+CATS[k].color+'">'+(CATS[k].lock?icon("lock")+' ':'')+CATS[k].label+'</div>';
+    });
+    html += '</div>';
+
+    html += '<div class="timeline" id="timeline"></div>';
+    html += '</div>';
+    app.innerHTML = html;
+
+    bindHeaderEvents();
+    tick(true);
+  }
+
+  function statusForBlock(b, st){
+    if (st.phase==="pre") return "upcoming";
+    if (st.phase==="post") return "done";
+    if (st.phase==="active"){
+      if (b.id===st.current.id) return "current";
+      return b.absEnd<=st.current.absStart ? "done" : "upcoming";
+    }
+    if (st.phase==="gap") return (st.next && b.absStart<st.next.absStart) ? "done" : "upcoming";
+    return "upcoming";
+  }
+
+  function renderTimeline(st){
+    var tl = document.getElementById("timeline");
+    if (!tl) return;
+    var html = "";
+    st.blocks.forEach(function(b){
+      var status = statusForBlock(b, st);
+      var cls = "row"+(status==="done"?" done":"")+(status==="current"?" current":"");
+      var statIcon = status==="done" ? "✓" : (status==="current" ? "▶" : "");
+      var cat = CATS[b.cat];
+      html += '<div class="'+cls+'" data-id="'+b.id+'">'+
+        '<div class="rail" style="background:'+cat.color+'"></div>'+
+        '<div class="body"><div class="info">'+
+          '<div class="time mono">'+b.start+' – '+b.end+'</div>'+
+          '<div class="label">'+esc(b.label)+' <span class="tag" style="background:'+cat.color+'">'+(cat.lock?icon("lock")+' ':'')+cat.label+'</span></div>'+
+        '</div><div class="status">'+statIcon+'</div></div>'+
+      '</div>';
+    });
+    tl.innerHTML = html;
+    var current = tl.querySelector(".row.current");
+    if (current) current.scrollIntoView({block:"center", behavior:"smooth"});
+  }
+
+  var lastTimelineRender = 0;
+
+  function tick(force){
+    applyTheme();
+    var clockEl = document.getElementById("liveclock");
+    if (clockEl) clockEl.textContent = fmtClock(new Date());
+    updateSyncUI();
+    if (!schedule || editMode) return;
+
+    var st = getState();
+    if (Date.now()-lastTimelineRender>4000 || force){
+      renderTimeline(st); lastTimelineRender = Date.now();
+    } else {
+      var tl = document.getElementById("timeline");
+      if (tl){
+        st.blocks.forEach(function(b){
+          var el = tl.querySelector('[data-id="'+b.id+'"]');
+          if (!el) return;
+          var status = statusForBlock(b, st);
+          el.classList.toggle("done", status==="done");
+          el.classList.toggle("current", status==="current");
+          var iconEl = el.querySelector(".status");
+          if (iconEl) iconEl.textContent = status==="done" ? "✓" : (status==="current" ? "▶" : "");
+        });
+      }
+    }
+
+    var tagEl = document.getElementById("cattag");
+    var labelEl = document.getElementById("hero-label");
+    var ringTime = document.getElementById("ring-time");
+    var ringSub = document.getElementById("ring-sub");
+    var ringFill = document.getElementById("ring-fill");
+    var nextEl = document.getElementById("hero-next");
+    if (!tagEl) return;
+
+    function setTag(text, color){
+      tagEl.textContent = text;
+      tagEl.style.background = color || "var(--text-faint)";
+    }
+
+    if (st.phase==="pre"){
+      var rem = st.next.absStart - st.now;
+      setTag("PRÓXIMAMENTE", "var(--blue)");
+      labelEl.textContent = "Empieza: "+st.next.label;
+      ringTime.textContent = fmtRemain(rem);
+      ringSub.textContent = "hasta "+st.next.start;
+      nextEl.innerHTML = 'Primer bloque a las <b>'+st.next.start+'</b>';
+      setRing(ringFill, 0, "var(--blue)", false);
+    } else if (st.phase==="active"){
+      var c = st.current, cat = CATS[c.cat];
+      var total = c.absEnd-c.absStart, elapsed = st.now-c.absStart, remain = c.absEnd-st.now;
+      var pct = Math.max(0, Math.min(1, elapsed/total));
+      var urgent = remain<=3;
+      setTag((cat.lock?"🔒 ":"")+cat.label.toUpperCase(), cat.color);
+      labelEl.textContent = c.label;
+      ringTime.textContent = fmtRemain(remain);
+      ringTime.style.color = urgent ? "var(--red)" : "var(--text)";
+      ringSub.textContent = "restantes";
+      nextEl.innerHTML = st.next ? 'Siguiente: <b>'+st.next.label+'</b> a las '+st.next.start : 'Último bloque del servicio';
+      setRing(ringFill, pct, cat.color, urgent);
+
+      if (lastCurrentId !== c.id){
+        if (lastCurrentId !== null){ beep(660,160); buzz([90,60,90]); }
+        lastCurrentId = c.id; pingedWarn = {};
+      }
+      if (remain<=3 && !pingedWarn[c.id]){ pingedWarn[c.id]=true; beep(880,140); buzz([120]); }
+    } else if (st.phase==="gap"){
+      setTag("MARGEN", "var(--text-faint)");
+      labelEl.textContent = st.next ? "Siguiente: "+st.next.label : "—";
+      ringTime.textContent = st.next ? fmtRemain(st.next.absStart-st.now) : "--:--";
+      ringSub.textContent = "hasta el siguiente bloque";
+      nextEl.innerHTML = "";
+      setRing(ringFill, 0, "var(--text-faint)", false);
+    } else if (st.phase==="post"){
+      setTag("FINALIZADO", "var(--green)");
+      labelEl.textContent = st.last.label;
+      ringTime.textContent = fmtRemain(st.now-st.last.absEnd);
+      ringSub.textContent = "desde el fin";
+      nextEl.innerHTML = "";
+      setRing(ringFill, 1, "var(--green)", false);
+    }
+  }
+
+  function setRing(el, pct, color, urgent){
+    if (!el) return;
+    var C = 477.5;
+    el.setAttribute("stroke-dashoffset", (C*(1-pct)).toFixed(1));
+    el.style.stroke = color;
+    el.classList.toggle("urgent", !!urgent);
+  }
+
+  function updateSyncUI(){
+    var dot = document.getElementById("syncdot");
+    var label = document.getElementById("synclabel");
+    if (!dot) return;
+    var ok = lastSyncAt && (Date.now()-lastSyncAt<20000);
+    dot.classList.toggle("stale", !ok);
+    if (label) label.textContent = ok ? "Sincronizado" : "Guardado local";
+  }
+
+  // ---------- edit mode ----------
+  function renderEdit(){
+    editDraft = JSON.parse(JSON.stringify(schedule));
+    editDraft.blocks.forEach(function(b){ b.cat = normalizeCat(b.cat); });
+    var html = bannerHTML();
+    html += '<div class="wrap">';
+    html += '<div class="section-title">DATOS DEL SERVICIO</div>';
+    html += '<div class="editfields">'+
+      '<div class="field"><label>Nombre del evento</label><input type="text" id="f-name" value="'+esc(editDraft.eventName)+'"></div>'+
+      '<div class="field"><label>Lugar</label><input type="text" id="f-venue" value="'+esc(editDraft.venue)+'"></div>'+
+      '<div class="field"><label>Fecha de inicio</label><input type="date" id="f-date" value="'+esc(editDraft.eventDate)+'"></div>'+
+    '</div>';
+    html += '<div class="section-title">BLOQUES</div><div id="editrows"></div>';
+    html += '<button class="addbtn" id="btn-add">+ Añadir bloque</button>';
+    html += '<div class="savebar"><button class="btn btn-ghost" id="btn-cancel">Cancelar</button>'+
+      '<button class="btn btn-primary" id="btn-save">Guardar cambios</button></div>';
+    html += '<button class="resetlink" id="btn-reset">Restaurar horario original</button>';
+    html += '<div id="resetconfirm"></div>';
+    html += '</div>';
+
+    app.innerHTML = html;
+    bindHeaderEvents();
+    renderEditRows();
+
+    document.getElementById("f-name").oninput = function(e){ editDraft.eventName=e.target.value; };
+    document.getElementById("f-venue").oninput = function(e){ editDraft.venue=e.target.value; };
+    document.getElementById("f-date").oninput = function(e){ editDraft.eventDate=e.target.value; };
+    document.getElementById("btn-add").onclick = function(){
+      var last = editDraft.blocks[editDraft.blocks.length-1];
+      editDraft.blocks.push({id:uid(), start:last?last.end:"12:00", end:last?last.end:"12:30", label:"Nuevo bloque", cat:"logistica"});
+      renderEditRows();
+    };
+    document.getElementById("btn-cancel").onclick = function(){ editMode=false; renderAll(); };
+    document.getElementById("btn-save").onclick = function(){
+      var ok = editDraft.blocks.every(function(b){ return b.label.trim() && b.start && b.end; });
+      if (!ok){ showToast("Cada bloque necesita hora de inicio, fin y nombre"); return; }
+      editDraft.updatedAt = new Date().toISOString();
+      schedule = editDraft;
+      editMode=false; pingedWarn={}; lastCurrentId=null;
+      renderAll();
+      showToast("Guardado en este dispositivo — sincronizando con el equipo…");
+      persistSchedule(schedule);
+    };
+    document.getElementById("btn-reset").onclick = function(){
+      document.getElementById("resetconfirm").innerHTML =
+        '<div class="confirmbar">¿Restaurar el horario original y descartar estos cambios?'+
+        '<button id="rc-yes" class="danger">Sí, restaurar</button><button id="rc-no">Cancelar</button></div>';
+      document.getElementById("rc-yes").onclick = function(){ editDraft = defaultSchedule(); renderEdit(); };
+      document.getElementById("rc-no").onclick = function(){ document.getElementById("resetconfirm").innerHTML=""; };
+    };
+  }
+
+  function renderEditRows(){
+    var wrap = document.getElementById("editrows");
+    var html = "";
+    editDraft.blocks.forEach(function(b, idx){
+      html += '<div class="editrow" data-idx="'+idx+'">'+
+        '<div class="editrow-top">'+
+          '<input type="time" value="'+b.start+'" data-f="start" data-idx="'+idx+'">'+
+          '<input type="time" value="'+b.end+'" data-f="end" data-idx="'+idx+'">'+
+        '</div>'+
+        '<div class="editrow-mid">'+
+          '<input type="text" value="'+esc(b.label)+'" data-f="label" data-idx="'+idx+'" placeholder="Actividad">'+
+          '<select data-f="cat" data-idx="'+idx+'">'+
+            CAT_ORDER.map(function(k){ return '<option value="'+k+'"'+(k===b.cat?' selected':'')+'>'+CATS[k].label+'</option>'; }).join("")+
+          '</select>'+
+          '<button class="delbtn" data-del="'+idx+'">×</button>'+
+        '</div>'+
+      '</div>';
+    });
+    wrap.innerHTML = html;
+    wrap.querySelectorAll("input,select").forEach(function(el){
+      el.addEventListener("input", function(){
+        var idx = parseInt(el.getAttribute("data-idx"),10), f = el.getAttribute("data-f");
+        editDraft.blocks[idx][f] = el.value;
+      });
+    });
+    wrap.querySelectorAll("[data-del]").forEach(function(el){
+      el.addEventListener("click", function(){
+        editDraft.blocks.splice(parseInt(el.getAttribute("data-del"),10),1);
+        renderEditRows();
+      });
+    });
+  }
+
+  function bindHeaderEvents(){
+    var s = document.getElementById("btn-sound");
+    if (s) s.onclick = function(){ soundOn=!soundOn; if (soundOn) beep(880,120); renderAll(); };
+    var e = document.getElementById("btn-edit");
+    if (e) e.onclick = function(){ editMode=!editMode; renderAll(); };
+    var t = document.getElementById("btn-theme");
+    if (t) t.onclick = function(){
+      themeMode = themeMode==="auto" ? "day" : (themeMode==="day" ? "night" : "auto");
+      renderAll();
+    };
+    var y = document.getElementById("btn-sync");
+    if (y) y.onclick = function(){ pollRemote(); showToast("Comprobando cambios del equipo…"); };
+  }
+
+  function showToast(msg){
+    var t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(window._toastT);
+    window._toastT = setTimeout(function(){ t.classList.remove("show"); }, 3200);
+  }
+
+  // ---------- boot ----------
+  applyTheme();
+  loadSchedule().then(function(){
+    if (!lastSyncAt) lastSyncAt = null;
+    renderAll();
+    setInterval(tick, 1000);
+    setInterval(pollRemote, 8000);
+    setInterval(function(){
+      if (!schedule || editMode) return;
+      var st = getState();
+      var title = "Escaleta en Directo";
+      if (st.phase==="active") title = "⏱ "+fmtRemain(st.current.absEnd-st.now)+" · "+st.current.label;
+      else if (st.phase==="pre") title = "⏱ "+fmtRemain(st.next.absStart-st.now)+" · antes de empezar";
+      else if (st.phase==="post") title = "✓ Servicio finalizado";
+      document.title = title;
+    }, 1000);
+  });
+
+})();
+</script>
+</body>
+</html>
