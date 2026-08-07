@@ -303,12 +303,41 @@
     return "Auto";
   }
 
+  // ---------- storage abstraction ----------
+  // window.storage only exists inside a Claude artifact. Outside that
+  // (e.g. self-hosted on GitHub Pages) it's undefined, and calling it
+  // directly throws synchronously before any .catch() can run — which
+  // silently kills the whole boot sequence and leaves a blank page.
+  // So: detect it, and fall back to localStorage (per-device only,
+  // no cross-team sync) when it isn't present.
+  var hasCloudStorage = (typeof window.storage !== "undefined" && window.storage !== null);
+
+  function storageGet(key, shared){
+    if (hasCloudStorage) return window.storage.get(key, shared);
+    return new Promise(function(resolve, reject){
+      try{
+        var v = localStorage.getItem(key);
+        if (v === null){ reject(new Error("not found")); return; }
+        resolve({key:key, value:v, shared:!!shared});
+      }catch(e){ reject(e); }
+    });
+  }
+  function storageSet(key, value, shared){
+    if (hasCloudStorage) return window.storage.set(key, value, shared);
+    return new Promise(function(resolve, reject){
+      try{
+        localStorage.setItem(key, value);
+        resolve({key:key, value:value, shared:!!shared});
+      }catch(e){ reject(e); }
+    });
+  }
+
   // ---------- storage ----------
   // .get() throws both for a genuinely missing key (expected on first run)
   // and for real errors — it does not distinguish. So a thrown get() is
   // never treated as fatal: fall back to defaults and try to persist.
   function loadSchedule(){
-    return window.storage.get(STORAGE_KEY, true).then(function(res){
+    return storageGet(STORAGE_KEY, true).then(function(res){
       if (res && res.value){
         schedule = JSON.parse(res.value);
         lastSyncAt = Date.now();
@@ -324,7 +353,7 @@
 
   function persistSchedule(sch, attempt){
     attempt = attempt || 0;
-    window.storage.set(STORAGE_KEY, JSON.stringify(sch), true).then(function(res){
+    storageSet(STORAGE_KEY, JSON.stringify(sch), true).then(function(res){
       if (!res) throw new Error("empty result");
       lastSyncAt = Date.now();
       updateSyncUI();
@@ -336,7 +365,7 @@
 
   function pollRemote(){
     if (editMode) return;
-    window.storage.get(STORAGE_KEY, true).then(function(res){
+    storageGet(STORAGE_KEY, true).then(function(res){
       if (res && res.value){
         var remote = JSON.parse(res.value);
         if (remote.updatedAt !== schedule.updatedAt){
@@ -426,7 +455,7 @@
         '</div>'+
       '</div>'+
       '<div class="pillrow">'+
-        '<button class="pill" id="btn-sync">'+icon("sync")+' Sincronizar</button>'+
+        '<button class="pill" id="btn-sync">'+icon("sync")+' '+(hasCloudStorage?'Sincronizar':'Recargar')+'</button>'+
         '<button class="pill'+(soundOn?' solid':'')+'" id="btn-sound">'+icon("sound")+' Avisos '+(soundOn?"on":"off")+'</button>'+
         '<button class="pill" id="btn-theme">'+themeIcon()+' '+themeLabel()+'</button>'+
         '<button class="pill'+(editMode?' solid':'')+'" id="btn-edit">'+icon("edit")+' Editar</button>'+
@@ -600,6 +629,11 @@
     var dot = document.getElementById("syncdot");
     var label = document.getElementById("synclabel");
     if (!dot) return;
+    if (!hasCloudStorage){
+      dot.classList.remove("stale");
+      if (label) label.textContent = "Guardado en este dispositivo";
+      return;
+    }
     var ok = lastSyncAt && (Date.now()-lastSyncAt<20000);
     dot.classList.toggle("stale", !ok);
     if (label) label.textContent = ok ? "Sincronizado" : "Guardado local";
@@ -701,7 +735,7 @@
       renderAll();
     };
     var y = document.getElementById("btn-sync");
-    if (y) y.onclick = function(){ pollRemote(); showToast("Comprobando cambios del equipo…"); };
+    if (y) y.onclick = function(){ pollRemote(); showToast(hasCloudStorage ? "Comprobando cambios del equipo…" : "Guardado solo en este dispositivo"); };
   }
 
   function showToast(msg){
