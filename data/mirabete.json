@@ -2,7 +2,7 @@
   "eventName": "Noches de Neón — Orquesta",
   "venue": "Casas de Mirabete (Cáceres)",
   "eventDate": "2026-08-14",
-  "updatedAt": "2026-08-14T10:31:14.846Z",
+  "updatedAt": "2026-08-14T10:33:38.574Z",
   "info": {
     "direccion": {
       "texto": "Casas de Mirabete, 10360, Cáceres — 2 h desde Artes Búho.",
@@ -79,7 +79,7 @@
       "id": "m-03",
       "start": "14:30",
       "end": "15:45",
-      "label": "Carga de equipo en Artes Búho",
+      "label": "Carga de equipo en Local Roulot",
       "cat": "logistica"
     },
     {
