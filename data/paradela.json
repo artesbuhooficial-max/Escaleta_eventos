@@ -1,0 +1,41 @@
+{
+  "eventName": "Noches de Neón — Orquesta",
+  "venue": "Paradela de San Román (Cáceres)",
+  "eventDate": "2026-08-15",
+  "updatedAt": "2026-08-14T08:00:00.000Z",
+  "info": {
+    "direccion": { "texto": "Peraleda de San Román, 10334, Cáceres — 2 h desde el alojamiento.", "mapa": "https://maps.app.goo.gl/fTUfwFKRYr5G9yCX9" },
+    "hotel": { "texto": "Casa rural para la noche del 15 al 16. Gestión: Pedro (El Quinto y Medio).", "mapa": "https://drive.google.com/drive/folders/1ZdHriusr2kMbOkTRkagxrCghy6qNAxOs", "tel": "675614648", "email": "info@elquintoymedio.com" },
+    "comida": "Comida reservada el sábado 15 en el propio alojamiento, al despertar. Sin comida ni agua del ayuntamiento durante la jornada de montaje/concierto.",
+    "backline": "A cargar desde Artes Búho (ver rider técnico).",
+    "rider": "https://drive.google.com/file/d/1obxKg2NFRulHOJNZeWOoyWrKt__Qzt2F/view?usp=sharing",
+    "camerino": "No confirmado — pueblo pequeño. Consultar con la concejala al llegar.",
+    "transporte": "David, Kike y Marlon.",
+    "contactos": [
+      { "rol": "Alojamiento técnicos", "nombre": "Pedro", "tel": "675614648", "email": "info@elquintoymedio.com" },
+      { "rol": "Técnico de sonido", "nombre": "Kike", "tel": "692076847" },
+      { "rol": "Técnico de iluminación", "nombre": "David", "tel": "638527425" },
+      { "rol": "Auxiliar sonido / iluminación", "nombre": "Marlon", "tel": "675511979" },
+      { "rol": "Conductor auxiliar", "nombre": "Lucas", "tel": "602675291" },
+      { "rol": "Dirección musical", "nombre": "Sergio", "tel": "618844147" },
+      { "rol": "Dirección musical", "nombre": "Marcos", "tel": "691889566" }
+    ]
+  },
+  "blocks": [
+    { "id": "p-01", "start": "13:30", "end": "14:00", "label": "Despertar y ducha (dejar habitación 14:00)", "cat": "logistica" },
+    { "id": "p-02", "start": "14:15", "end": "16:15", "label": "Comida en el restaurante del hotel", "cat": "descanso" },
+    { "id": "p-03", "start": "16:15", "end": "16:30", "label": "Margen", "cat": "descanso" },
+    { "id": "p-04", "start": "16:30", "end": "17:45", "label": "Viaje, llegada y descarga", "cat": "logistica" },
+    { "id": "p-05", "start": "17:45", "end": "20:45", "label": "Montaje general", "cat": "tecnica" },
+    { "id": "p-06", "start": "20:45", "end": "21:15", "label": "Margen", "cat": "descanso" },
+    { "id": "p-07", "start": "21:15", "end": "21:30", "label": "Montaje de instrumentos", "cat": "tecnica" },
+    { "id": "p-08", "start": "21:30", "end": "23:30", "label": "Prueba de sonido", "cat": "tecnica" },
+    { "id": "p-09", "start": "23:30", "end": "00:15", "label": "Descanso y cena del equipo", "cat": "descanso" },
+    { "id": "p-10", "start": "00:15", "end": "00:30", "label": "Prevenidos, equipo técnico", "cat": "show" },
+    { "id": "p-11", "start": "00:30", "end": "02:30", "label": "Concierto — Parte 1", "cat": "show" },
+    { "id": "p-12", "start": "02:30", "end": "03:00", "label": "Descanso", "cat": "descanso" },
+    { "id": "p-13", "start": "03:00", "end": "05:00", "label": "Concierto — Parte 2", "cat": "show" },
+    { "id": "p-14", "start": "05:00", "end": "07:15", "label": "Desmontaje y carga de camión", "cat": "logistica" },
+    { "id": "p-15", "start": "07:15", "end": "07:30", "label": "Viaje al alojamiento", "cat": "logistica" }
+  ]
+}

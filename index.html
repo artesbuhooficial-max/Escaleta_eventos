@@ -240,6 +240,9 @@
 
   var STORAGE_PREFIX = "running-order-v2-";
   var ACTIVE_KEY = "running-order-v2-active";
+  var TOKEN_KEY = "running-order-v2-gh-token";
+  var GH_REPO = "artesbuhooficial-max/Escaleta_eventos";
+  var GH_BRANCH = "main";
   var editMode = false;
   var soundOn = false;
   var themeMode = "auto"; // auto | day | night
@@ -416,58 +419,97 @@
     return "Auto";
   }
 
-  // ---------- storage abstraction ----------
-  // window.storage only exists inside a Claude artifact. Outside that
-  // (e.g. self-hosted on GitHub Pages) it's undefined, and calling it
-  // directly throws synchronously before any .catch() can run — which
-  // silently kills the whole boot sequence and leaves a blank page.
-  // So: detect it, and fall back to localStorage (per-device only,
-  // no cross-team sync) when it isn't present.
-  var hasCloudStorage = (typeof window.storage !== "undefined" && window.storage !== null);
+  // ---------- shared storage: the GitHub repo itself is the database ----------
+  // Reads: everyone fetches data/<id>.json straight from GitHub's raw CDN —
+  // public, fast, no auth, no rate limit worth worrying about at crew scale.
+  // Writes: only whoever holds a valid GitHub token (Contents: Read & write
+  // on this one repo) can PUT a new version — enforced by GitHub itself, not
+  // just hidden in the UI. Nobody without the token can persist edits; their
+  // changes stay local to their own device and get overwritten on next poll.
+  var editToken = null;
+  try{ editToken = localStorage.getItem(TOKEN_KEY) || null; }catch(e){}
 
-  function storageGet(key, shared){
-    if (hasCloudStorage) return window.storage.get(key, shared);
-    return new Promise(function(resolve, reject){
-      try{
-        var v = localStorage.getItem(key);
-        if (v === null){ reject(new Error("not found")); return; }
-        resolve({key:key, value:v, shared:!!shared});
-      }catch(e){ reject(e); }
+  function rawUrl(id){
+    return "https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/data/"+id+".json?t="+Date.now();
+  }
+  function apiUrl(id){
+    return "https://api.github.com/repos/"+GH_REPO+"/contents/data/"+id+".json";
+  }
+  function b64EncodeUtf8(str){
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  function fetchRemote(id){
+    return fetch(rawUrl(id), {cache:"no-store"}).then(function(r){
+      if (!r.ok){ var e = new Error("fetch failed"); e.status = r.status; throw e; }
+      return r.json();
     });
   }
-  function storageSet(key, value, shared){
-    if (hasCloudStorage) return window.storage.set(key, value, shared);
-    return new Promise(function(resolve, reject){
-      try{
-        localStorage.setItem(key, value);
-        resolve({key:key, value:value, shared:!!shared});
-      }catch(e){ reject(e); }
+
+  function githubGetSha(id, token){
+    return fetch(apiUrl(id)+"?ref="+GH_BRANCH, {
+      headers:{ "Authorization":"Bearer "+token, "Accept":"application/vnd.github+json" }
+    }).then(function(r){
+      if (!r.ok){ var e = new Error("sha lookup failed"); e.status = r.status; throw e; }
+      return r.json();
+    }).then(function(j){ return j.sha; });
+  }
+
+  function githubPutFile(id, token, sha, data){
+    var body = {
+      message: "Actualiza escaleta — "+id+" ("+new Date().toISOString()+")",
+      content: b64EncodeUtf8(JSON.stringify(data, null, 2)),
+      sha: sha,
+      branch: GH_BRANCH
+    };
+    return fetch(apiUrl(id), {
+      method:"PUT",
+      headers:{ "Authorization":"Bearer "+token, "Accept":"application/vnd.github+json", "Content-Type":"application/json" },
+      body: JSON.stringify(body)
+    }).then(function(r){
+      if (!r.ok){ var e = new Error("publish failed"); e.status = r.status; throw e; }
+      return r.json();
     });
+  }
+
+  function promptForToken(){
+    var t = window.prompt(
+      "Pega tu token de GitHub (permiso Contents: Read and write, solo para este repositorio) para poder publicar cambios para todo el equipo:\n\n" +
+      "Se guarda solo en este dispositivo, nunca en el código del sitio."
+    );
+    if (t){
+      t = t.trim();
+      editToken = t;
+      try{ localStorage.setItem(TOKEN_KEY, t); }catch(e){}
+    }
+    return t;
+  }
+  function clearToken(){
+    editToken = null;
+    try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
   }
 
   // ---------- schedule loading / persistence (per production) ----------
   function loadProduction(id){
-    return storageGet(STORAGE_PREFIX+id, true).then(function(res){
-      if (res && res.value){
-        productions[id] = JSON.parse(res.value);
-        lastSyncAt[id] = Date.now();
-      } else {
-        productions[id] = defaultDataFor(id);
-        persistProduction(id);
-      }
+    return fetchRemote(id).then(function(data){
+      productions[id] = data;
+      lastSyncAt[id] = Date.now();
+      try{ localStorage.setItem(STORAGE_PREFIX+id, JSON.stringify(data)); }catch(e){}
     }).catch(function(){
-      productions[id] = defaultDataFor(id);
-      persistProduction(id);
+      // offline / first paint before anything ever synced: fall back to the
+      // last copy we saw on this device, then to the hardcoded defaults.
+      var cached = null;
+      try{ cached = localStorage.getItem(STORAGE_PREFIX+id); }catch(e){}
+      productions[id] = cached ? JSON.parse(cached) : defaultDataFor(id);
     });
   }
 
   function loadAll(){
     productions = {};
     return Promise.all(PROD_ORDER.map(loadProduction)).then(function(){
-      return storageGet(ACTIVE_KEY, false).then(function(res){
-        if (res && res.value && PROD_META[res.value]) activeId = res.value;
-        else activeId = pickDefaultId();
-      }).catch(function(){ activeId = pickDefaultId(); });
+      var stored = null;
+      try{ stored = localStorage.getItem(ACTIVE_KEY); }catch(e){}
+      activeId = (stored && PROD_META[stored]) ? stored : pickDefaultId();
     });
   }
 
@@ -497,36 +539,51 @@
     return PROD_ORDER[PROD_ORDER.length-1];
   }
 
-  function persistProduction(id, attempt){
+  function publishProduction(id, attempt){
     attempt = attempt || 0;
-    storageSet(STORAGE_PREFIX+id, JSON.stringify(productions[id]), true).then(function(res){
-      if (!res) throw new Error("empty result");
+    var token = editToken || promptForToken();
+    if (!token){
+      showToast("Cambios guardados solo en este dispositivo — sin token no se publican");
+      return;
+    }
+    githubGetSha(id, token).then(function(sha){
+      return githubPutFile(id, token, sha, productions[id]);
+    }).then(function(){
+      try{ localStorage.setItem(STORAGE_PREFIX+id, JSON.stringify(productions[id])); }catch(e){}
       lastSyncAt[id] = Date.now();
       updateSyncUI();
-    }).catch(function(){
-      updateSyncUI();
-      if (attempt < 6) setTimeout(function(){ persistProduction(id, attempt+1); }, 5000);
+      showToast("Publicado — el equipo lo verá en unos segundos");
+    }).catch(function(err){
+      var status = err && err.status;
+      if (status===401 || status===403){
+        clearToken();
+        showToast("Token no válido o sin permisos. Pulsa Editar y Guardar de nuevo para introducir uno nuevo.");
+      } else if (status===409){
+        showToast("Alguien más publicó un cambio a la vez. Recarga la página y vuelve a intentarlo.");
+      } else if (attempt < 5){
+        setTimeout(function(){ publishProduction(id, attempt+1); }, 6000);
+      } else {
+        showToast("No se pudo publicar (revisa la conexión). Los cambios siguen aquí, en este dispositivo.");
+      }
     });
   }
 
   function persistActiveId(){
-    storageSet(ACTIVE_KEY, activeId, false).catch(function(){});
+    try{ localStorage.setItem(ACTIVE_KEY, activeId); }catch(e){}
   }
 
   function pollRemote(){
     if (editMode) return;
     var id = activeId;
-    storageGet(STORAGE_PREFIX+id, true).then(function(res){
-      if (res && res.value){
-        var remote = JSON.parse(res.value);
-        if (remote.updatedAt !== productions[id].updatedAt){
-          productions[id] = remote; pingedWarn = {};
-          renderAll();
-          showToast("Horario actualizado por el equipo");
-        }
-        lastSyncAt[id] = Date.now();
-        updateSyncUI();
+    fetchRemote(id).then(function(remote){
+      if (remote.updatedAt !== productions[id].updatedAt){
+        productions[id] = remote; pingedWarn = {};
+        try{ localStorage.setItem(STORAGE_PREFIX+id, JSON.stringify(remote)); }catch(e){}
+        renderAll();
+        showToast("Horario actualizado por el equipo");
       }
+      lastSyncAt[id] = Date.now();
+      updateSyncUI();
     }).catch(function(){});
   }
 
@@ -612,7 +669,7 @@
 
   function bannerHTML(){
     var meta = PROD_META[activeId];
-    var syncOk = lastSyncAt[activeId] && (Date.now()-lastSyncAt[activeId]<20000);
+    var syncOk = lastSyncAt[activeId] && (Date.now()-lastSyncAt[activeId]<25000);
     return ''+
     '<div class="banner '+meta.bannerClass+'"><div class="wrap">'+
       '<div class="banner-top">'+
@@ -622,12 +679,12 @@
         '<div class="banner-right">'+
           '<div class="mono liveclock" id="liveclock">--:--:--</div>'+
           '<div class="syncline"><span class="syncdot'+(syncOk?'':' stale')+'" id="syncdot"></span>'+
-          '<span class="synclabel" id="synclabel">'+(syncOk?'Sincronizado':'Guardado local')+'</span></div>'+
+          '<span class="synclabel" id="synclabel">'+(syncOk?'Sincronizado':'Conectando…')+'</span></div>'+
         '</div>'+
       '</div>'+
       tabsHTML()+
       '<div class="pillrow">'+
-        '<button class="pill" id="btn-sync">'+icon("sync")+' '+(hasCloudStorage?'Sincronizar':'Recargar')+'</button>'+
+        '<button class="pill" id="btn-sync">'+icon("sync")+' Sincronizar</button>'+
         '<button class="pill'+(infoOpen?' solid':'')+'" id="btn-info">'+icon("info")+' Info</button>'+
         '<button class="pill'+(soundOn?' solid':'')+'" id="btn-sound">'+icon("sound")+' Avisos '+(soundOn?"on":"off")+'</button>'+
         '<button class="pill" id="btn-theme">'+themeIcon()+' '+themeLabel()+'</button>'+
@@ -838,14 +895,9 @@
     var dot = document.getElementById("syncdot");
     var label = document.getElementById("synclabel");
     if (!dot) return;
-    if (!hasCloudStorage){
-      dot.classList.remove("stale");
-      if (label) label.textContent = "Guardado en este dispositivo";
-      return;
-    }
-    var ok = lastSyncAt[activeId] && (Date.now()-lastSyncAt[activeId]<20000);
+    var ok = lastSyncAt[activeId] && (Date.now()-lastSyncAt[activeId]<25000);
     dot.classList.toggle("stale", !ok);
-    if (label) label.textContent = ok ? "Sincronizado" : "Guardado local";
+    if (label) label.textContent = ok ? "Sincronizado" : "Sin conexión con el equipo";
   }
 
   // ---------- edit mode ----------
@@ -863,7 +915,8 @@
     html += '<div class="section-title">BLOQUES</div><div id="editrows"></div>';
     html += '<button class="addbtn" id="btn-add">+ Añadir bloque</button>';
     html += '<div class="savebar"><button class="btn btn-ghost" id="btn-cancel">Cancelar</button>'+
-      '<button class="btn btn-primary" id="btn-save">Guardar cambios</button></div>';
+      '<button class="btn btn-primary" id="btn-save">Guardar y publicar</button></div>';
+    html += '<button class="resetlink" id="btn-token">'+(editToken ? '🔑 Token de publicación configurado — cambiar' : '🔑 Sin token de publicación — solo se guardará en este dispositivo')+'</button>';
     html += '<button class="resetlink" id="btn-reset">Restaurar horario original</button>';
     html += '<div id="resetconfirm"></div>';
     html += '</div>';
@@ -881,15 +934,17 @@
       renderEditRows();
     };
     document.getElementById("btn-cancel").onclick = function(){ editMode=false; renderAll(); };
+    document.getElementById("btn-token").onclick = function(){ promptForToken(); renderEdit(); };
     document.getElementById("btn-save").onclick = function(){
       var ok = editDraft.blocks.every(function(b){ return b.label.trim() && b.start && b.end; });
       if (!ok){ showToast("Cada bloque necesita hora de inicio, fin y nombre"); return; }
       editDraft.updatedAt = new Date().toISOString();
-      productions[activeId] = editDraft;
+      var id = activeId;
+      productions[id] = editDraft;
       editMode=false; pingedWarn={}; lastCurrentId=null;
       renderAll();
-      showToast("Guardado en este dispositivo — sincronizando con el equipo…");
-      persistProduction(activeId);
+      showToast("Publicando para todo el equipo…");
+      publishProduction(id);
     };
     document.getElementById("btn-reset").onclick = function(){
       document.getElementById("resetconfirm").innerHTML =
@@ -946,7 +1001,7 @@
       renderAll();
     };
     var y = document.getElementById("btn-sync");
-    if (y) y.onclick = function(){ pollRemote(); showToast(hasCloudStorage ? "Comprobando cambios del equipo…" : "Guardado solo en este dispositivo"); };
+    if (y) y.onclick = function(){ pollRemote(); showToast("Comprobando cambios del equipo…"); };
     document.querySelectorAll("[data-tab]").forEach(function(el){
       el.onclick = function(){
         var id = el.getAttribute("data-tab");

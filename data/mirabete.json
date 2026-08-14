@@ -1,0 +1,43 @@
+{
+  "eventName": "Noches de Neón — Orquesta",
+  "venue": "Casas de Mirabete (Cáceres)",
+  "eventDate": "2026-08-14",
+  "updatedAt": "2026-08-14T08:00:00.000Z",
+  "info": {
+    "direccion": { "texto": "Casas de Mirabete, 10360, Cáceres — 2 h desde Artes Búho.", "mapa": "https://maps.app.goo.gl/pFSCr9V2RCgMoQC77" },
+    "hotel": { "texto": "Alojamiento en Madroñera. Reserva nº 195264 a nombre de Artes Búho. Check-in antes de las 23:00.", "mapa": "https://maps.app.goo.gl/HJAf1YUjoRvhFuo18" },
+    "comida": "No hay comida ni agua por parte de la organización — hay que llevarla. Pueblo pequeño: prever cena por si no hay dónde comprar.",
+    "backline": "Batería completa a cargar desde Artes Búho.",
+    "rider": "https://drive.google.com/file/d/1obxKg2NFRulHOJNZeWOoyWrKt__Qzt2F/view?usp=sharing",
+    "camerino": "No confirmado — pueblo pequeño. Consultar con la concejala al llegar.",
+    "transporte": "David y Kike.",
+    "contactos": [
+      { "rol": "Ayuntamiento", "nombre": "María", "tel": "633820421" },
+      { "rol": "Alcalde", "nombre": "Juan Luis", "tel": "608749125" },
+      { "rol": "Técnico de sonido", "nombre": "Kike", "tel": "692076847" },
+      { "rol": "Técnico de iluminación", "nombre": "David", "tel": "638527425" },
+      { "rol": "Auxiliar sonido / iluminación", "nombre": "Marlon", "tel": "675511979" },
+      { "rol": "Conductor auxiliar", "nombre": "Lucas", "tel": "602675291" },
+      { "rol": "Dirección musical", "nombre": "Sergio", "tel": "618844147" },
+      { "rol": "Dirección musical", "nombre": "Marcos", "tel": "691889566" }
+    ]
+  },
+  "blocks": [
+    { "id": "m-01", "start": "13:30", "end": "14:00", "label": "Recogida de camión (David)", "cat": "logistica" },
+    { "id": "m-02", "start": "14:00", "end": "14:30", "label": "Margen", "cat": "descanso" },
+    { "id": "m-03", "start": "14:30", "end": "15:45", "label": "Carga de equipo en Artes Búho", "cat": "logistica" },
+    { "id": "m-04", "start": "15:45", "end": "16:45", "label": "Compra de comida e intendencia", "cat": "logistica" },
+    { "id": "m-05", "start": "16:45", "end": "17:45", "label": "Viaje, llegada y descarga", "cat": "logistica" },
+    { "id": "m-06", "start": "17:45", "end": "20:15", "label": "Montaje general", "cat": "tecnica" },
+    { "id": "m-07", "start": "20:15", "end": "21:15", "label": "Margen", "cat": "descanso" },
+    { "id": "m-08", "start": "21:15", "end": "21:30", "label": "Montaje de instrumentos", "cat": "tecnica" },
+    { "id": "m-09", "start": "21:30", "end": "23:30", "label": "Prueba de sonido", "cat": "tecnica" },
+    { "id": "m-10", "start": "23:30", "end": "00:15", "label": "Descanso y cena del equipo", "cat": "descanso" },
+    { "id": "m-11", "start": "00:15", "end": "00:30", "label": "Prevenidos, equipo técnico", "cat": "show" },
+    { "id": "m-12", "start": "00:30", "end": "02:30", "label": "Concierto — Parte 1", "cat": "show" },
+    { "id": "m-13", "start": "02:30", "end": "03:00", "label": "Descanso", "cat": "descanso" },
+    { "id": "m-14", "start": "03:00", "end": "05:00", "label": "Concierto — Parte 2", "cat": "show" },
+    { "id": "m-15", "start": "05:00", "end": "07:15", "label": "Desmontaje y carga de camión", "cat": "logistica" },
+    { "id": "m-16", "start": "07:15", "end": "07:45", "label": "Viaje al alojamiento", "cat": "logistica" }
+  ]
+}
