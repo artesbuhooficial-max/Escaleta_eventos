@@ -30,7 +30,10 @@
     --green:#19a34b;
     --red:#dc2625;
     --teal:#2ca0bb;
+    --violet:#7c53c9;
+    --violet-deep:#5a35a6;
     --header-grad:linear-gradient(135deg,#5c80dc 0%,#2a46a8 100%);
+    --header-grad-b:linear-gradient(135deg,#a084e0 0%,#5a35a6 100%);
     --on-fill-text:#ffffff;
     --shadow:0 10px 28px rgba(20,30,70,.08);
   }
@@ -49,7 +52,10 @@
     --green:#34c97a;
     --red:#ff5b5a;
     --teal:#4dc3de;
+    --violet:#b79cf0;
+    --violet-deep:#8b5fd6;
     --header-grad:linear-gradient(135deg,#1c3568 0%,#081328 100%);
+    --header-grad-b:linear-gradient(135deg,#3c2568 0%,#140a28 100%);
     --on-fill-text:#0e2146;
     --shadow:0 10px 28px rgba(0,0,0,.35);
   }
@@ -70,6 +76,7 @@
     background:var(--header-grad);position:relative;overflow:hidden;
     padding:16px 0 18px;transition:background .5s ease;
   }
+  .banner.prod-paradela{background:var(--header-grad-b);}
   .banner::after{
     content:"";position:absolute;right:-70px;top:-60px;width:220px;height:220px;
     border-radius:50%;background:rgba(255,255,255,.07);
@@ -89,7 +96,23 @@
   .syncdot.stale{background:rgba(255,255,255,.4);}
   .synclabel{color:rgba(255,255,255,.75);font-size:10px;}
 
-  .pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;position:relative;z-index:1;}
+  /* ---------- production tabs ---------- */
+  .tabrow{display:flex;gap:8px;margin-top:14px;position:relative;z-index:1;}
+  .tab{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:9px 6px 8px;border-radius:13px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);cursor:pointer;transition:.15s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab-dot{width:7px;height:7px;border-radius:50%;margin-bottom:2px;background:#fff;}
+  .tab-name{color:#fff;font-size:12.5px;font-weight:700;line-height:1.2;}
+  .tab-date{color:rgba(255,255,255,.75);font-size:10px;font-weight:600;letter-spacing:.03em;margin-top:1px;}
+  .tab.active{background:#fff;}
+  .tab.active .tab-name{color:var(--tab-ink);}
+  .tab.active .tab-date{color:var(--tab-ink);opacity:.7;}
+  .tab.active .tab-dot{background:var(--tab-ink);}
+
+  .pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1;}
   .pill{
     display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:20px;
     background:rgba(255,255,255,.14);color:#fff;font-size:12.5px;font-weight:600;
@@ -101,7 +124,8 @@
 
   /* ---------- body head (event info) ---------- */
   .body-head{padding-top:20px;}
-  .eyebrow{font-size:10.5px;letter-spacing:.14em;color:var(--gold);font-weight:700;margin-bottom:6px;}
+  .eyebrow{font-size:10.5px;letter-spacing:.14em;color:var(--gold);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+  .eyebrow .prodbadge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--on-fill-text);}
   h1.evtitle{font-size:23px;font-weight:800;margin:0;line-height:1.2;letter-spacing:-.01em;}
   .evmeta{font-size:13px;color:var(--text-dim);margin-top:4px;}
 
@@ -135,6 +159,21 @@
     flex:none;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;
     padding:5px 11px;border-radius:20px;color:var(--on-fill-text);
   }
+
+  /* ---------- info card ---------- */
+  .infocard{margin-top:14px;border-radius:16px;border:1px solid var(--border);background:var(--bg-elev);box-shadow:var(--shadow);padding:16px 16px 4px;}
+  .info-block{margin-bottom:14px;}
+  .info-block h3{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-faint);margin:0 0 5px;font-weight:800;}
+  .info-block p{font-size:13.5px;color:var(--text);line-height:1.5;margin:0;}
+  .info-block a{color:var(--blue);text-decoration:none;font-weight:700;}
+  .info-block a.mapline{display:inline-block;margin-top:3px;}
+  .info-contacts{display:flex;flex-direction:column;}
+  .info-contact{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;padding:8px 0;border-top:1px solid var(--border);}
+  .info-contact:first-child{border-top:none;}
+  .info-contact .who{min-width:0;}
+  .info-contact .role{color:var(--text-dim);font-size:11px;display:block;}
+  .info-contact .name{font-weight:700;}
+  .info-contact a{color:var(--blue);font-weight:700;text-decoration:none;font-family:'Space Mono',monospace;font-size:12px;flex:none;white-space:nowrap;}
 
   /* ---------- timeline ---------- */
   .timeline{margin-top:6px;display:flex;flex-direction:column;gap:7px;}
@@ -199,12 +238,15 @@
 (function(){
   "use strict";
 
-  var STORAGE_KEY = "running-order-v1";
+  var STORAGE_PREFIX = "running-order-v2-";
+  var ACTIVE_KEY = "running-order-v2-active";
   var editMode = false;
   var soundOn = false;
   var themeMode = "auto"; // auto | day | night
-  var schedule = null;
-  var lastSyncAt = null;
+  var infoOpen = false;
+  var productions = null;   // { mirabete:{...}, paradela:{...} }
+  var activeId = null;
+  var lastSyncAt = {};      // per production id
   var pingedWarn = {};
   var editDraft = null;
 
@@ -215,37 +257,108 @@
     descanso: {label:"Descanso",        color:"var(--green)",     lock:true}
   };
   var CAT_ORDER = ["logistica","tecnica","show","descanso"];
-  // upgrades schedules saved under the previous 6-category scheme
   var CAT_MIGRATE = {logistica:"logistica",montaje:"tecnica",sonido:"tecnica",
                       descanso:"descanso",show:"show",margen:"descanso"};
+
+  // ---------- the two productions of the weekend ----------
+  var PROD_ORDER = ["mirabete","paradela"];
+  var PROD_META = {
+    mirabete:{
+      tabName:"Mirabete", tabDate:"Vie 14", accentVar:"--blue-deep", bannerClass:""
+    },
+    paradela:{
+      tabName:"Paradela", tabDate:"Sáb 15", accentVar:"--violet-deep", bannerClass:"prod-paradela"
+    }
+  };
 
   function uid(){ return Math.random().toString(36).slice(2,9); }
   function normalizeCat(c){ return CATS[c] ? c : (CAT_MIGRATE[c] || "logistica"); }
 
-  function defaultSchedule(){
+  function defaultDataFor(id){
+    if (id === "mirabete"){
+      return {
+        eventName:"Noches de Neón — Orquesta",
+        venue:"Casas de Mirabete (Cáceres)",
+        eventDate:"2026-08-14",
+        updatedAt:new Date().toISOString(),
+        info:{
+          direccion:{texto:"Casas de Mirabete, 10360, Cáceres — 2 h desde Artes Búho.", mapa:"https://maps.app.goo.gl/pFSCr9V2RCgMoQC77"},
+          hotel:{texto:"Alojamiento en Madroñera. Reserva nº 195264 a nombre de Artes Búho. Check-in antes de las 23:00.", mapa:"https://maps.app.goo.gl/HJAf1YUjoRvhFuo18"},
+          comida:"No hay comida ni agua por parte de la organización — hay que llevarla. Pueblo pequeño: prever cena por si no hay dónde comprar.",
+          backline:"Batería completa a cargar desde Artes Búho.",
+          rider:"https://drive.google.com/file/d/1obxKg2NFRulHOJNZeWOoyWrKt__Qzt2F/view?usp=sharing",
+          camerino:"No confirmado — pueblo pequeño. Consultar con la concejala al llegar.",
+          transporte:"David y Kike.",
+          contactos:[
+            {rol:"Ayuntamiento", nombre:"María", tel:"633820421"},
+            {rol:"Alcalde", nombre:"Juan Luis", tel:"608749125"},
+            {rol:"Técnico de sonido", nombre:"Kike", tel:"692076847"},
+            {rol:"Técnico de iluminación", nombre:"David", tel:"638527425"},
+            {rol:"Auxiliar sonido / iluminación", nombre:"Marlon", tel:"675511979"},
+            {rol:"Conductor auxiliar", nombre:"Lucas", tel:"602675291"},
+            {rol:"Dirección musical", nombre:"Sergio", tel:"618844147"},
+            {rol:"Dirección musical", nombre:"Marcos", tel:"691889566"}
+          ]
+        },
+        blocks:[
+          {id:uid(),start:"13:30",end:"14:00",label:"Recogida de camión (David)",cat:"logistica"},
+          {id:uid(),start:"14:00",end:"14:30",label:"Margen",cat:"descanso"},
+          {id:uid(),start:"14:30",end:"15:45",label:"Carga de equipo en Artes Búho",cat:"logistica"},
+          {id:uid(),start:"15:45",end:"16:45",label:"Compra de comida e intendencia",cat:"logistica"},
+          {id:uid(),start:"16:45",end:"17:45",label:"Viaje, llegada y descarga",cat:"logistica"},
+          {id:uid(),start:"17:45",end:"20:15",label:"Montaje general",cat:"tecnica"},
+          {id:uid(),start:"20:15",end:"21:15",label:"Margen",cat:"descanso"},
+          {id:uid(),start:"21:15",end:"21:30",label:"Montaje de instrumentos",cat:"tecnica"},
+          {id:uid(),start:"21:30",end:"23:30",label:"Prueba de sonido",cat:"tecnica"},
+          {id:uid(),start:"23:30",end:"00:15",label:"Descanso y cena del equipo",cat:"descanso"},
+          {id:uid(),start:"00:15",end:"00:30",label:"Prevenidos, equipo técnico",cat:"show"},
+          {id:uid(),start:"00:30",end:"02:30",label:"Concierto — Parte 1",cat:"show"},
+          {id:uid(),start:"02:30",end:"03:00",label:"Descanso",cat:"descanso"},
+          {id:uid(),start:"03:00",end:"05:00",label:"Concierto — Parte 2",cat:"show"},
+          {id:uid(),start:"05:00",end:"07:15",label:"Desmontaje y carga de camión",cat:"logistica"},
+          {id:uid(),start:"07:15",end:"07:45",label:"Viaje al alojamiento",cat:"logistica"}
+        ]
+      };
+    }
     return {
-      eventName:"Noches de Neón",
-      venue:"Paredes de Escalona (Toledo)",
-      eventDate:"2026-08-08",
+      eventName:"Noches de Neón — Orquesta",
+      venue:"Paradela de San Román (Cáceres)",
+      eventDate:"2026-08-15",
       updatedAt:new Date().toISOString(),
+      info:{
+        direccion:{texto:"Peraleda de San Román, 10334, Cáceres — 2 h desde el alojamiento.", mapa:"https://maps.app.goo.gl/fTUfwFKRYr5G9yCX9"},
+        hotel:{texto:"Casa rural para la noche del 15 al 16. Gestión: Pedro (El Quinto y Medio).", mapa:"https://drive.google.com/drive/folders/1ZdHriusr2kMbOkTRkagxrCghy6qNAxOs", tel:"675614648", email:"info@elquintoymedio.com"},
+        comida:"Comida reservada el sábado 15 en el propio alojamiento, al despertar. Sin comida ni agua del ayuntamiento durante la jornada de montaje/concierto.",
+        backline:"A cargar desde Artes Búho (ver rider técnico).",
+        rider:"https://drive.google.com/file/d/1obxKg2NFRulHOJNZeWOoyWrKt__Qzt2F/view?usp=sharing",
+        camerino:"No confirmado — pueblo pequeño. Consultar con la concejala al llegar.",
+        transporte:"David, Kike y Marlon.",
+        contactos:[
+          {rol:"Alojamiento técnicos", nombre:"Pedro", tel:"675614648", email:"info@elquintoymedio.com"},
+          {rol:"Técnico de sonido", nombre:"Kike", tel:"692076847"},
+          {rol:"Técnico de iluminación", nombre:"David", tel:"638527425"},
+          {rol:"Auxiliar sonido / iluminación", nombre:"Marlon", tel:"675511979"},
+          {rol:"Conductor auxiliar", nombre:"Lucas", tel:"602675291"},
+          {rol:"Dirección musical", nombre:"Sergio", tel:"618844147"},
+          {rol:"Dirección musical", nombre:"Marcos", tel:"691889566"}
+        ]
+      },
       blocks:[
-        {id:uid(),start:"13:30",end:"14:00",label:"Recogida de camión",cat:"logistica"},
-        {id:uid(),start:"14:00",end:"14:30",label:"Margen",cat:"descanso"},
-        {id:uid(),start:"14:30",end:"15:45",label:"Carga de equipo en Artes Búho",cat:"logistica"},
-        {id:uid(),start:"15:45",end:"16:45",label:"Margen",cat:"descanso"},
-        {id:uid(),start:"16:45",end:"17:45",label:"Viaje, llegada y descarga",cat:"logistica"},
-        {id:uid(),start:"17:45",end:"20:15",label:"Montaje general",cat:"tecnica"},
-        {id:uid(),start:"20:15",end:"20:30",label:"Montaje de instrumentos",cat:"tecnica"},
-        {id:uid(),start:"20:30",end:"22:30",label:"Prueba de sonido",cat:"tecnica"},
-        {id:uid(),start:"22:30",end:"23:15",label:"Descanso y cena del equipo",cat:"descanso"},
-        {id:uid(),start:"23:15",end:"23:30",label:"Prevenidos, equipo técnico",cat:"show"},
-        {id:uid(),start:"23:30",end:"01:30",label:"Actuación — Parte 1",cat:"show"},
-        {id:uid(),start:"01:30",end:"02:00",label:"Intermedio",cat:"descanso"},
-        {id:uid(),start:"02:00",end:"04:00",label:"Actuación — Parte 2",cat:"show"},
-        {id:uid(),start:"04:00",end:"06:15",label:"Desmontaje y carga de camión",cat:"logistica"},
-        {id:uid(),start:"06:15",end:"07:15",label:"Viaje de regreso",cat:"logistica"},
-        {id:uid(),start:"07:15",end:"08:15",label:"Descarga y fin en Artes Búho",cat:"logistica"},
-        {id:uid(),start:"08:15",end:"08:45",label:"Devolución de furgoneta",cat:"logistica"}
+        {id:uid(),start:"13:30",end:"14:00",label:"Despertar y ducha (dejar habitación 14:00)",cat:"logistica"},
+        {id:uid(),start:"14:15",end:"16:15",label:"Comida en el restaurante del hotel",cat:"descanso"},
+        {id:uid(),start:"16:15",end:"16:30",label:"Margen",cat:"descanso"},
+        {id:uid(),start:"16:30",end:"17:45",label:"Viaje, llegada y descarga",cat:"logistica"},
+        {id:uid(),start:"17:45",end:"20:45",label:"Montaje general",cat:"tecnica"},
+        {id:uid(),start:"20:45",end:"21:15",label:"Margen",cat:"descanso"},
+        {id:uid(),start:"21:15",end:"21:30",label:"Montaje de instrumentos",cat:"tecnica"},
+        {id:uid(),start:"21:30",end:"23:30",label:"Prueba de sonido",cat:"tecnica"},
+        {id:uid(),start:"23:30",end:"00:15",label:"Descanso y cena del equipo",cat:"descanso"},
+        {id:uid(),start:"00:15",end:"00:30",label:"Prevenidos, equipo técnico",cat:"show"},
+        {id:uid(),start:"00:30",end:"02:30",label:"Concierto — Parte 1",cat:"show"},
+        {id:uid(),start:"02:30",end:"03:00",label:"Descanso",cat:"descanso"},
+        {id:uid(),start:"03:00",end:"05:00",label:"Concierto — Parte 2",cat:"show"},
+        {id:uid(),start:"05:00",end:"07:15",label:"Desmontaje y carga de camión",cat:"logistica"},
+        {id:uid(),start:"07:15",end:"07:30",label:"Viaje al alojamiento",cat:"logistica"}
       ]
     };
   }
@@ -332,52 +445,92 @@
     });
   }
 
-  // ---------- storage ----------
-  // .get() throws both for a genuinely missing key (expected on first run)
-  // and for real errors — it does not distinguish. So a thrown get() is
-  // never treated as fatal: fall back to defaults and try to persist.
-  function loadSchedule(){
-    return storageGet(STORAGE_KEY, true).then(function(res){
+  // ---------- schedule loading / persistence (per production) ----------
+  function loadProduction(id){
+    return storageGet(STORAGE_PREFIX+id, true).then(function(res){
       if (res && res.value){
-        schedule = JSON.parse(res.value);
-        lastSyncAt = Date.now();
+        productions[id] = JSON.parse(res.value);
+        lastSyncAt[id] = Date.now();
       } else {
-        schedule = defaultSchedule();
-        persistSchedule(schedule);
+        productions[id] = defaultDataFor(id);
+        persistProduction(id);
       }
     }).catch(function(){
-      schedule = defaultSchedule();
-      persistSchedule(schedule);
+      productions[id] = defaultDataFor(id);
+      persistProduction(id);
     });
   }
 
-  function persistSchedule(sch, attempt){
+  function loadAll(){
+    productions = {};
+    return Promise.all(PROD_ORDER.map(loadProduction)).then(function(){
+      return storageGet(ACTIVE_KEY, false).then(function(res){
+        if (res && res.value && PROD_META[res.value]) activeId = res.value;
+        else activeId = pickDefaultId();
+      }).catch(function(){ activeId = pickDefaultId(); });
+    });
+  }
+
+  function pickDefaultId(){
+    var now = Date.now();
+    // 1) a production currently in progress wins
+    for (var i=0;i<PROD_ORDER.length;i++){
+      var id = PROD_ORDER[i];
+      var abs = computeAbs(productions[id]);
+      if (!abs.blocks.length) continue;
+      var startMs = abs.base.getTime() + abs.blocks[0].absStart*60000;
+      var endMs = abs.base.getTime() + abs.blocks[abs.blocks.length-1].absEnd*60000;
+      if (now>=startMs && now<=endMs) return id;
+    }
+    // 2) otherwise the nearest upcoming one
+    var best=null, bestDelta=Infinity;
+    for (var j=0;j<PROD_ORDER.length;j++){
+      var id2 = PROD_ORDER[j];
+      var abs2 = computeAbs(productions[id2]);
+      if (!abs2.blocks.length) continue;
+      var startMs2 = abs2.base.getTime() + abs2.blocks[0].absStart*60000;
+      var delta = startMs2 - now;
+      if (delta>=0 && delta<bestDelta){ bestDelta=delta; best=id2; }
+    }
+    if (best) return best;
+    // 3) everything's in the past — show the most recent one
+    return PROD_ORDER[PROD_ORDER.length-1];
+  }
+
+  function persistProduction(id, attempt){
     attempt = attempt || 0;
-    storageSet(STORAGE_KEY, JSON.stringify(sch), true).then(function(res){
+    storageSet(STORAGE_PREFIX+id, JSON.stringify(productions[id]), true).then(function(res){
       if (!res) throw new Error("empty result");
-      lastSyncAt = Date.now();
+      lastSyncAt[id] = Date.now();
       updateSyncUI();
     }).catch(function(){
       updateSyncUI();
-      if (attempt < 6) setTimeout(function(){ persistSchedule(sch, attempt+1); }, 5000);
+      if (attempt < 6) setTimeout(function(){ persistProduction(id, attempt+1); }, 5000);
     });
+  }
+
+  function persistActiveId(){
+    storageSet(ACTIVE_KEY, activeId, false).catch(function(){});
   }
 
   function pollRemote(){
     if (editMode) return;
-    storageGet(STORAGE_KEY, true).then(function(res){
+    var id = activeId;
+    storageGet(STORAGE_PREFIX+id, true).then(function(res){
       if (res && res.value){
         var remote = JSON.parse(res.value);
-        if (remote.updatedAt !== schedule.updatedAt){
-          schedule = remote; pingedWarn = {};
+        if (remote.updatedAt !== productions[id].updatedAt){
+          productions[id] = remote; pingedWarn = {};
           renderAll();
           showToast("Horario actualizado por el equipo");
         }
-        lastSyncAt = Date.now();
+        lastSyncAt[id] = Date.now();
         updateSyncUI();
       }
     }).catch(function(){});
   }
+
+  function currentSchedule(){ return productions[activeId]; }
 
   // ---------- audio / haptics ----------
   function beep(freq,dur){
@@ -399,7 +552,8 @@
   var lastCurrentId = null;
 
   function getState(){
-    var abs = computeAbs(schedule);
+    var sch = currentSchedule();
+    var abs = computeAbs(sch);
     var now = nowAbsMinutes(abs.base);
     var blocks = abs.blocks;
     if (!blocks.length) return {phase:"empty"};
@@ -435,15 +589,32 @@
       sound:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
       edit:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>',
       sync:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.3 6.4M3 12a9 9 0 0 1 15.3-6.4"></path><path d="M21 3v6h-6M3 21v-6h6"></path></svg>',
+      info:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6"></path><path d="M12 7.5v.01"></path></svg>',
       lock:'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>'
     };
     return icons[name]||"";
   }
 
+  function tabsHTML(){
+    var html = '<div class="tabrow">';
+    PROD_ORDER.forEach(function(id){
+      var meta = PROD_META[id];
+      var active = id===activeId;
+      html += '<div class="tab'+(active?' active':'')+'" data-tab="'+id+'" style="'+(active?'--tab-ink:var('+meta.accentVar+');':'')+'">'+
+        '<span class="tab-dot"></span>'+
+        '<span class="tab-name">'+meta.tabName+'</span>'+
+        '<span class="tab-date">'+meta.tabDate+'</span>'+
+      '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
   function bannerHTML(){
-    var syncOk = lastSyncAt && (Date.now()-lastSyncAt<20000);
+    var meta = PROD_META[activeId];
+    var syncOk = lastSyncAt[activeId] && (Date.now()-lastSyncAt[activeId]<20000);
     return ''+
-    '<div class="banner"><div class="wrap">'+
+    '<div class="banner '+meta.bannerClass+'"><div class="wrap">'+
       '<div class="banner-top">'+
         '<div class="ab-badge">AB</div>'+
         '<div><div class="banner-title">Escaleta en Directo</div>'+
@@ -454,8 +625,10 @@
           '<span class="synclabel" id="synclabel">'+(syncOk?'Sincronizado':'Guardado local')+'</span></div>'+
         '</div>'+
       '</div>'+
+      tabsHTML()+
       '<div class="pillrow">'+
         '<button class="pill" id="btn-sync">'+icon("sync")+' '+(hasCloudStorage?'Sincronizar':'Recargar')+'</button>'+
+        '<button class="pill'+(infoOpen?' solid':'')+'" id="btn-info">'+icon("info")+' Info</button>'+
         '<button class="pill'+(soundOn?' solid':'')+'" id="btn-sound">'+icon("sound")+' Avisos '+(soundOn?"on":"off")+'</button>'+
         '<button class="pill" id="btn-theme">'+themeIcon()+' '+themeLabel()+'</button>'+
         '<button class="pill'+(editMode?' solid':'')+'" id="btn-edit">'+icon("edit")+' Editar</button>'+
@@ -464,11 +637,45 @@
   }
 
   function bodyHeadHTML(){
+    var sch = currentSchedule();
+    var meta = PROD_META[activeId];
+    var otherIdx = PROD_ORDER.indexOf(activeId)+1;
     return '<div class="wrap"><div class="body-head">'+
-      '<div class="eyebrow">EVENTO ACTUAL</div>'+
-      '<h1 class="evtitle" id="ro-name">'+esc(schedule.eventName)+'</h1>'+
-      '<div class="evmeta">'+esc(schedule.venue)+' · '+fmtDateLong(schedule.eventDate)+' · <span class="accent">en directo</span></div>'+
+      '<div class="eyebrow">EVENTO ACTUAL <span class="prodbadge" style="background:var('+meta.accentVar+')">PRODUCCIÓN '+otherIdx+' DE '+PROD_ORDER.length+'</span></div>'+
+      '<h1 class="evtitle" id="ro-name">'+esc(sch.eventName)+'</h1>'+
+      '<div class="evmeta">'+esc(sch.venue)+' · '+fmtDateLong(sch.eventDate)+' · <span class="accent">en directo</span></div>'+
     '</div></div>';
+  }
+
+  function infoHTML(){
+    var info = currentSchedule().info;
+    if (!info) return "";
+    var html = '<div class="wrap"><div class="infocard">';
+
+    html += '<div class="info-block"><h3>Dirección de la actuación</h3><p>'+esc(info.direccion.texto)+'</p>'+
+      (info.direccion.mapa ? '<a class="mapline" href="'+esc(info.direccion.mapa)+'" target="_blank" rel="noopener">Abrir en Google Maps →</a>' : '')+
+    '</div>';
+
+    html += '<div class="info-block"><h3>Alojamiento</h3><p>'+esc(info.hotel.texto)+'</p>'+
+      (info.hotel.mapa ? '<a class="mapline" href="'+esc(info.hotel.mapa)+'" target="_blank" rel="noopener">Ver reserva / ubicación →</a>' : '')+
+    '</div>';
+
+    html += '<div class="info-block"><h3>Comida y consumiciones</h3><p>'+esc(info.comida)+'</p></div>';
+    html += '<div class="info-block"><h3>Backline</h3><p>'+esc(info.backline)+'</p></div>';
+    html += '<div class="info-block"><h3>Camerino</h3><p>'+esc(info.camerino)+'</p></div>';
+    html += '<div class="info-block"><h3>Transporte</h3><p>'+esc(info.transporte)+'</p></div>';
+    if (info.rider) html += '<div class="info-block"><h3>Rider técnico</h3><a href="'+esc(info.rider)+'" target="_blank" rel="noopener">Abrir rider →</a></div>';
+
+    html += '<div class="info-block"><h3>Contactos</h3><div class="info-contacts">';
+    info.contactos.forEach(function(c){
+      html += '<div class="info-contact"><div class="who"><span class="role">'+esc(c.rol)+'</span><span class="name">'+esc(c.nombre)+'</span></div>'+
+        (c.tel ? '<a href="tel:+34'+esc(c.tel)+'">'+esc(c.tel)+'</a>' : '')+
+      '</div>';
+    });
+    html += '</div></div>';
+
+    html += '</div></div>';
+    return html;
   }
 
   function renderView(){
@@ -492,9 +699,11 @@
       html += '<div class="legend-item" style="background:'+CATS[k].color+'">'+(CATS[k].lock?icon("lock")+' ':'')+CATS[k].label+'</div>';
     });
     html += '</div>';
-
-    html += '<div class="timeline" id="timeline"></div>';
     html += '</div>';
+
+    if (infoOpen) html += infoHTML();
+
+    html += '<div class="wrap"><div class="timeline" id="timeline"></div></div>';
     app.innerHTML = html;
 
     bindHeaderEvents();
@@ -541,7 +750,7 @@
     var clockEl = document.getElementById("liveclock");
     if (clockEl) clockEl.textContent = fmtClock(new Date());
     updateSyncUI();
-    if (!schedule || editMode) return;
+    if (!productions || editMode) return;
 
     var st = getState();
     if (Date.now()-lastTimelineRender>4000 || force){
@@ -634,18 +843,18 @@
       if (label) label.textContent = "Guardado en este dispositivo";
       return;
     }
-    var ok = lastSyncAt && (Date.now()-lastSyncAt<20000);
+    var ok = lastSyncAt[activeId] && (Date.now()-lastSyncAt[activeId]<20000);
     dot.classList.toggle("stale", !ok);
     if (label) label.textContent = ok ? "Sincronizado" : "Guardado local";
   }
 
   // ---------- edit mode ----------
   function renderEdit(){
-    editDraft = JSON.parse(JSON.stringify(schedule));
+    editDraft = JSON.parse(JSON.stringify(currentSchedule()));
     editDraft.blocks.forEach(function(b){ b.cat = normalizeCat(b.cat); });
     var html = bannerHTML();
     html += '<div class="wrap">';
-    html += '<div class="section-title">DATOS DEL SERVICIO</div>';
+    html += '<div class="section-title">DATOS DEL SERVICIO — '+esc(PROD_META[activeId].tabName).toUpperCase()+'</div>';
     html += '<div class="editfields">'+
       '<div class="field"><label>Nombre del evento</label><input type="text" id="f-name" value="'+esc(editDraft.eventName)+'"></div>'+
       '<div class="field"><label>Lugar</label><input type="text" id="f-venue" value="'+esc(editDraft.venue)+'"></div>'+
@@ -676,17 +885,17 @@
       var ok = editDraft.blocks.every(function(b){ return b.label.trim() && b.start && b.end; });
       if (!ok){ showToast("Cada bloque necesita hora de inicio, fin y nombre"); return; }
       editDraft.updatedAt = new Date().toISOString();
-      schedule = editDraft;
+      productions[activeId] = editDraft;
       editMode=false; pingedWarn={}; lastCurrentId=null;
       renderAll();
       showToast("Guardado en este dispositivo — sincronizando con el equipo…");
-      persistSchedule(schedule);
+      persistProduction(activeId);
     };
     document.getElementById("btn-reset").onclick = function(){
       document.getElementById("resetconfirm").innerHTML =
-        '<div class="confirmbar">¿Restaurar el horario original y descartar estos cambios?'+
+        '<div class="confirmbar">¿Restaurar el horario original de '+esc(PROD_META[activeId].tabName)+' y descartar estos cambios?'+
         '<button id="rc-yes" class="danger">Sí, restaurar</button><button id="rc-no">Cancelar</button></div>';
-      document.getElementById("rc-yes").onclick = function(){ editDraft = defaultSchedule(); renderEdit(); };
+      document.getElementById("rc-yes").onclick = function(){ editDraft = defaultDataFor(activeId); renderEdit(); };
       document.getElementById("rc-no").onclick = function(){ document.getElementById("resetconfirm").innerHTML=""; };
     };
   }
@@ -729,6 +938,8 @@
     if (s) s.onclick = function(){ soundOn=!soundOn; if (soundOn) beep(880,120); renderAll(); };
     var e = document.getElementById("btn-edit");
     if (e) e.onclick = function(){ editMode=!editMode; renderAll(); };
+    var i = document.getElementById("btn-info");
+    if (i) i.onclick = function(){ infoOpen=!infoOpen; renderAll(); };
     var t = document.getElementById("btn-theme");
     if (t) t.onclick = function(){
       themeMode = themeMode==="auto" ? "day" : (themeMode==="day" ? "night" : "auto");
@@ -736,6 +947,15 @@
     };
     var y = document.getElementById("btn-sync");
     if (y) y.onclick = function(){ pollRemote(); showToast(hasCloudStorage ? "Comprobando cambios del equipo…" : "Guardado solo en este dispositivo"); };
+    document.querySelectorAll("[data-tab]").forEach(function(el){
+      el.onclick = function(){
+        var id = el.getAttribute("data-tab");
+        if (id===activeId) return;
+        activeId = id; editMode=false; pingedWarn={}; lastCurrentId=null;
+        persistActiveId();
+        renderAll();
+      };
+    });
   }
 
   function showToast(msg){
@@ -747,18 +967,18 @@
 
   // ---------- boot ----------
   applyTheme();
-  loadSchedule().then(function(){
-    if (!lastSyncAt) lastSyncAt = null;
+  loadAll().then(function(){
     renderAll();
     setInterval(tick, 1000);
     setInterval(pollRemote, 8000);
     setInterval(function(){
-      if (!schedule || editMode) return;
+      if (!productions || editMode) return;
       var st = getState();
+      var tag = PROD_META[activeId].tabName;
       var title = "Escaleta en Directo";
-      if (st.phase==="active") title = "⏱ "+fmtRemain(st.current.absEnd-st.now)+" · "+st.current.label;
-      else if (st.phase==="pre") title = "⏱ "+fmtRemain(st.next.absStart-st.now)+" · antes de empezar";
-      else if (st.phase==="post") title = "✓ Servicio finalizado";
+      if (st.phase==="active") title = "⏱ "+fmtRemain(st.current.absEnd-st.now)+" · "+st.current.label+" · "+tag;
+      else if (st.phase==="pre") title = "⏱ "+fmtRemain(st.next.absStart-st.now)+" · antes de empezar · "+tag;
+      else if (st.phase==="post") title = "✓ Finalizado · "+tag;
       document.title = title;
     }, 1000);
   });
